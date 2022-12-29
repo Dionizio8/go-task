@@ -10,6 +10,7 @@ import (
 	"github.com/Dionizio8/go-task/entity"
 	"github.com/Dionizio8/go-task/infra/db"
 	"github.com/Dionizio8/go-task/infra/repository"
+	"github.com/Dionizio8/go-task/infra/seed"
 	"github.com/Dionizio8/go-task/usecase/task"
 	"github.com/Dionizio8/go-task/usecase/user"
 	"github.com/joho/godotenv"
@@ -30,6 +31,8 @@ func main() {
 	if err := db.AutoMigrate(&entity.User{}, &entity.Task{}); err != nil {
 		log.Fatalln(err)
 	}
+
+	seed.NewSeedUser(db).Load()
 
 	userRepo := repository.NewUserRepository(db)
 	userService := user.NewService(userRepo)
