@@ -15,7 +15,7 @@ func NewService(r Repository) *Service {
 	}
 }
 
-func (s *Service) CreateTask(title, description string, userId, managerId uuid.UUID, status string) error {
+func (s *Service) CreateTask(title, description string, userId, managerId uuid.UUID, status string) (uuid.UUID, error) {
 	task := entity.NewTask(title, description, userId, managerId, status)
 	return s.repo.Create(task)
 }
@@ -29,8 +29,9 @@ func (s *Service) FindTasktById(id string) (entity.Task, error) {
 }
 
 func (s *Service) List() ([]entity.Task, error) {
-	return []entity.Task{}, nil
+	return s.repo.GetAll()
 }
+
 func (s *Service) FindTaskByUserId(userId string) ([]entity.Task, error) {
-	return []entity.Task{}, nil
+	return s.repo.GetByUserId(userId)
 }

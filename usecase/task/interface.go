@@ -6,7 +6,7 @@ import (
 )
 
 type Repository interface {
-	Create(task *entity.Task) error
+	Create(task *entity.Task) (uuid.UUID, error)
 	Update(task *entity.Task) (entity.Task, error)
 	GetById(id string) (entity.Task, error)
 	GetAll() ([]entity.Task, error)
@@ -14,7 +14,7 @@ type Repository interface {
 }
 
 type UseCase interface {
-	CreateTask(title, description string, userId, managerId uuid.UUID, status string) error
+	CreateTask(title, description string, userId, managerId uuid.UUID, status string) (uuid.UUID, error)
 	EditTask(*entity.Task) (entity.Task, error)
 	FindTasktById(id string) (entity.Task, error)
 	List() ([]entity.Task, error)

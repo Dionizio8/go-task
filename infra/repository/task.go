@@ -2,6 +2,7 @@ package repository
 
 import (
 	"github.com/Dionizio8/go-task/entity"
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -15,8 +16,8 @@ func NewTaskRepository(db *gorm.DB) *TaskRepository {
 	}
 }
 
-func (t *TaskRepository) Create(task *entity.Task) error {
-	return t.db.Create(task).Error
+func (t *TaskRepository) Create(task *entity.Task) (uuid.UUID, error) {
+	return task.Id, t.db.Create(task).Error
 }
 
 func (t *TaskRepository) Update(task *entity.Task) (entity.Task, error) {
@@ -29,10 +30,18 @@ func (t *TaskRepository) GetById(id string) (entity.Task, error) {
 }
 
 func (t *TaskRepository) GetAll() ([]entity.Task, error) {
-	return []entity.Task{}, nil
+	var tasks []entity.Task
+
+	err := t.db.Find(&tasks).Error
+
+	return tasks, err
 
 }
 
 func (t *TaskRepository) GetByUserId(userId string) ([]entity.Task, error) {
-	return []entity.Task{}, nil
+	var tasks []entity.Task
+
+	err := t.db.Where("user_id = ?", userId).Order("create_at  asc").Find(&tasks).Error
+
+	return tasks, err
 }

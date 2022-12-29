@@ -6,6 +6,11 @@ import (
 	"github.com/google/uuid"
 )
 
+const (
+	roleManager    = "MANAGER"
+	roleTechnician = "TECHNICIAN"
+)
+
 type User struct {
 	Id       uuid.UUID `json:"id" gorm:"type:char(36);primaryKey"`
 	Name     string    `json:"name"`
@@ -22,4 +27,12 @@ func NewUser(userName, role string) *User {
 		CreateAt: time.Now(),
 		UpdateAt: time.Now(),
 	}
+}
+
+func GetUserRoleManager() string {
+	return roleManager
+}
+
+func GetUserRoleTechnician() string {
+	return roleTechnician
 }
