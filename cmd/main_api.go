@@ -7,6 +7,7 @@ import (
 	"syscall"
 
 	"github.com/Dionizio8/go-task/app/api"
+	"github.com/Dionizio8/go-task/app/api/middleware"
 	"github.com/Dionizio8/go-task/entity"
 	"github.com/Dionizio8/go-task/infra/db"
 	"github.com/Dionizio8/go-task/infra/repository"
@@ -37,12 +38,15 @@ func main() {
 	userRepo := repository.NewUserRepository(db)
 	userService := user.NewService(userRepo)
 
+	userMiddler := middleware.NewUserMiddler(userRepo)
+
 	taskRepo := repository.NewTaskRepository(db)
 	taskService := task.NewService(taskRepo)
 
 	srv, err := api.NewServer(
-		api.WithTaskService(*taskService),
 		api.WithUserService(*userService),
+		api.WithUserMiddler(*userMiddler),
+		api.WithTaskService(*taskService),
 	)
 	if err != nil {
 		log.Fatal("error start server: ", err)

@@ -16,6 +16,7 @@ type Server struct {
 	httpServer  *http.Server
 	taskService task.Service
 	userService user.Service
+	userMiddler middleware.UserMiddler
 }
 
 func NewServer(options ...func(server *Server) error) (*Server, error) {
@@ -28,7 +29,6 @@ func NewServer(options ...func(server *Server) error) (*Server, error) {
 	}
 
 	r := gin.Default()
-	r.Use(middleware.RoleUseMiddler)
 
 	server.router(r)
 	server.httpServer = &http.Server{
@@ -48,6 +48,13 @@ func NewServer(options ...func(server *Server) error) (*Server, error) {
 func WithUserService(userService user.Service) func(server *Server) error {
 	return func(server *Server) error {
 		server.userService = userService
+		return nil
+	}
+}
+
+func WithUserMiddler(userMiddler middleware.UserMiddler) func(server *Server) error {
+	return func(server *Server) error {
+		server.userMiddler = userMiddler
 		return nil
 	}
 }

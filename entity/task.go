@@ -6,6 +6,11 @@ import (
 	"github.com/google/uuid"
 )
 
+const (
+	InitialState = "IN_PROGRESS"
+	FinalState   = "CONCLUDED"
+)
+
 type Task struct {
 	Id            uuid.UUID `json:"id" gorm:"type:char(36);primaryKey"`
 	Title         string    `json:"title"`
@@ -28,4 +33,12 @@ func NewTask(title, description string, userId uuid.UUID, managerUserId uuid.UUI
 		CreateAt:      time.Now(),
 		UpdateAt:      time.Now(),
 	}
+}
+
+func GetTaskInitialState() string {
+	return InitialState
+}
+
+func GetTaskFinalState() string {
+	return FinalState
 }
