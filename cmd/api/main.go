@@ -19,14 +19,15 @@ import (
 )
 
 func main() {
-	err := godotenv.Load("../.env")
+	log.Println("start api")
 
-	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
-	defer stop()
-
+	err := godotenv.Load("../../.env")
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
+
+	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	defer stop()
 
 	db := db.InitDb()
 
@@ -69,5 +70,4 @@ func main() {
 	}
 
 	log.Println("exiting")
-
 }
