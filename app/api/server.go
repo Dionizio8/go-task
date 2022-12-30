@@ -7,16 +7,18 @@ import (
 	"time"
 
 	"github.com/Dionizio8/go-task/app/api/middleware"
+	"github.com/Dionizio8/go-task/infra/kafka"
 	"github.com/Dionizio8/go-task/usecase/task"
 	"github.com/Dionizio8/go-task/usecase/user"
 	"github.com/gin-gonic/gin"
 )
 
 type Server struct {
-	httpServer  *http.Server
-	taskService task.Service
-	userService user.Service
-	userMiddler middleware.UserMiddler
+	httpServer      *http.Server
+	taskService     task.Service
+	userService     user.Service
+	userMiddler     middleware.UserMiddler
+	messageExecutor kafka.KafkaMessageExecutor
 }
 
 func NewServer(options ...func(server *Server) error) (*Server, error) {
@@ -62,6 +64,13 @@ func WithUserMiddler(userMiddler middleware.UserMiddler) func(server *Server) er
 func WithTaskService(taskService task.Service) func(server *Server) error {
 	return func(server *Server) error {
 		server.taskService = taskService
+		return nil
+	}
+}
+
+func WithMessageExecutor(messageExecutor kafka.KafkaMessageExecutor) func(server *Server) error {
+	return func(server *Server) error {
+		server.messageExecutor = messageExecutor
 		return nil
 	}
 }

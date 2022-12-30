@@ -10,6 +10,7 @@ import (
 	"github.com/Dionizio8/go-task/app/api/middleware"
 	"github.com/Dionizio8/go-task/entity"
 	"github.com/Dionizio8/go-task/infra/db"
+	"github.com/Dionizio8/go-task/infra/kafka"
 	"github.com/Dionizio8/go-task/infra/repository"
 	"github.com/Dionizio8/go-task/infra/seed"
 	"github.com/Dionizio8/go-task/usecase/task"
@@ -35,6 +36,11 @@ func main() {
 
 	seed.NewSeedUser(db).Load()
 
+	kafkaWriter := kafka.InitKafkaProducer()
+	defer kafkaWriter.Close()
+
+	messageExecutor := kafka.NewKafkaMessageExecutor(kafkaWriter)
+
 	userRepo := repository.NewUserRepository(db)
 	userService := user.NewService(userRepo)
 
@@ -47,6 +53,7 @@ func main() {
 		api.WithUserService(*userService),
 		api.WithUserMiddler(*userMiddler),
 		api.WithTaskService(*taskService),
+		api.WithMessageExecutor(*messageExecutor),
 	)
 	if err != nil {
 		log.Fatal("error start server: ", err)
