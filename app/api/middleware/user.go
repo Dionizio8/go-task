@@ -45,10 +45,10 @@ func (u *UserMiddler) RoleUseMiddler(ctx *gin.Context) {
 	ctx.Params = append(ctx.Params, gin.Param{Key: "role", Value: user.Role})
 }
 
+// TODO: Refatorar o valiRule por URI e não por Method
 func (u *UserMiddler) validRule(user entity.User, method string) error {
-	if user.Role == entity.GetUserRoleManager() && method == http.MethodPost {
+	if user.Role == entity.GetUserRoleManager() && method != http.MethodGet {
 		return fmt.Errorf("the user %v does not have permission to perform this action", user.Id)
 	}
-
 	return nil
 }

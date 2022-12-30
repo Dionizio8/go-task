@@ -23,13 +23,12 @@ func (r *UserRepository) Create(user *entity.User) error {
 
 func (r *UserRepository) GetById(id string) (entity.User, error) {
 	var user entity.User
-
-	result := r.db.First(&user, "id = ?", id)
-	if result.Error != nil {
-		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+	err := r.db.First(&user, "id = ?", id).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return entity.User{}, errors.New("user not found")
 		}
-		return entity.User{}, result.Error
+		return entity.User{}, err
 	}
 
 	return user, nil

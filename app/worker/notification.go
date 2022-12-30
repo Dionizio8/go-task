@@ -2,7 +2,9 @@ package worker
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"log"
 
 	"github.com/Dionizio8/go-task/infra/kafka"
 )
@@ -24,7 +26,13 @@ func (n *NotificationHandler) Execute(ctx context.Context) {
 			panic("could not read message " + err.Error())
 		}
 
-		//TODO: “The tech X performed the task Y on date
-		fmt.Println("received:", string(msg.Value))
+		var data kafka.TaskMessage
+
+		err = json.Unmarshal(msg.Value, &data)
+		if err != nil {
+			log.Println(err.Error())
+		}
+
+		fmt.Printf("The tech %v performed the task %v on %v\n", data.UserId, data.TaskId, data.Date.Format("2006-01-02 15:04:05"))
 	}
 }

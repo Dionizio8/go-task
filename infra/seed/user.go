@@ -19,8 +19,9 @@ func NewSeedUser(db *gorm.DB) *SeedUser {
 }
 
 var users = []entity.User{
-	*entity.NewUser("Gabriel", entity.GetUserRoleManager()),
-	*entity.NewUser("Dionizio", entity.GetUserRoleTechnician()),
+	*entity.NewUser("Manager", entity.GetUserRoleManager()),
+	*entity.NewUser("Technician 1", entity.GetUserRoleTechnician()),
+	*entity.NewUser("Technician 2", entity.GetUserRoleTechnician()),
 }
 
 func (s *SeedUser) Load() {

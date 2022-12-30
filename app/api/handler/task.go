@@ -5,9 +5,11 @@ import (
 	"errors"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/Dionizio8/go-task/app/api/presenter"
 	"github.com/Dionizio8/go-task/entity"
+	"github.com/Dionizio8/go-task/infra/kafka"
 	"github.com/Dionizio8/go-task/usecase/task"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -15,10 +17,11 @@ import (
 
 type TaskHandler struct {
 	service task.Service
+	msg     kafka.KafkaMessageExecutor
 }
 
-func NewTaskHandler(service task.Service) *TaskHandler {
-	return &TaskHandler{service: service}
+func NewTaskHandler(service task.Service, msg kafka.KafkaMessageExecutor) *TaskHandler {
+	return &TaskHandler{service: service, msg: msg}
 }
 
 func (h *TaskHandler) Create(ctx *gin.Context) {
@@ -34,14 +37,17 @@ func (h *TaskHandler) Create(ctx *gin.Context) {
 	if err != nil {
 		log.Println(err.Error())
 		ctx.AbortWithError(http.StatusInternalServerError, errorMessage)
+		return
 	}
 
 	userId := uuid.MustParse(ctx.GetHeader("userId"))
 
+	//TODO: Validar se o ManagerUserId é um usuário da role MANAGER
 	taskId, err := h.service.CreateTask(input.Title, input.Description, userId, input.ManagerUserId, entity.GetTaskInitialState())
 	if err != nil {
 		log.Println(err.Error())
 		ctx.AbortWithError(http.StatusInternalServerError, errorMessage)
+		return
 	}
 
 	response := &presenter.Task{
@@ -62,6 +68,7 @@ func (h *TaskHandler) List(ctx *gin.Context) {
 	if err != nil {
 		log.Println(err.Error())
 		ctx.AbortWithError(http.StatusInternalServerError, errorMessage)
+		return
 	}
 
 	var response []*presenter.Task
@@ -75,6 +82,49 @@ func (h *TaskHandler) List(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, response)
+}
+
+func (h *TaskHandler) EditStatus(ctx *gin.Context) {
+	userId := ctx.GetHeader("userId")
+	taskId := ctx.Param("taskId")
+	if taskId == "" {
+		ctx.AbortWithError(http.StatusBadRequest, errors.New("taskId not found"))
+		return
+	}
+
+	errorMessage := errors.New("error find task")
+	task, err := h.service.EditTaskStatus(taskId, userId, entity.GetTaskFinalState())
+	if err != nil {
+		log.Println(err.Error())
+		ctx.AbortWithError(http.StatusInternalServerError, errorMessage)
+		return
+	}
+
+	updateAt := time.Now()
+
+	msg := kafka.TaskMessage{
+		UserId:    task.UserId.String(),
+		ManagerId: task.ManagerUserId.String(),
+		TaskId:    task.Id.String(),
+		Status:    task.Status,
+		Date:      updateAt,
+	}
+
+	msgString, _ := json.Marshal(msg)
+
+	if task.Status == entity.GetTaskFinalState() {
+		go h.msg.Push(ctx, uuid.New().String(), string(msgString))
+	}
+
+	response := &presenter.Task{
+		Id:          task.Id.String(),
+		Title:       task.Title,
+		Description: task.Description,
+		Status:      task.Status,
+	}
+
+	ctx.JSON(http.StatusCreated, response)
+
 }
 
 func (h *TaskHandler) getRoleList(role string, userId string) ([]entity.Task, error) {

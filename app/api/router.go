@@ -13,8 +13,9 @@ func (s *Server) router(r gin.IRouter) {
 	task := r.Group("/")
 	task.Use(s.userMiddler.RoleUseMiddler)
 	{
-		taskHandler := handler.NewTaskHandler(s.taskService)
+		taskHandler := handler.NewTaskHandler(s.taskService, s.messageExecutor)
 		task.POST("/task", taskHandler.Create)
 		task.GET("/task", taskHandler.List)
+		task.PATCH("/task/conclude/:taskId", taskHandler.EditStatus)
 	}
 }
