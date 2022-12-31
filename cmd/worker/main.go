@@ -3,7 +3,9 @@ package main
 import (
 	"context"
 	"log"
+	"os"
 	"os/signal"
+	"path"
 	"syscall"
 
 	"github.com/Dionizio8/go-task/app/worker"
@@ -14,10 +16,7 @@ import (
 func main() {
 	log.Println("start worker")
 
-	err := godotenv.Load("../../.env")
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
+	godotenv.Load(path.Join(os.Getenv("HOME"), "/go/src/github.com/Dionizio8/go-task/.env"))
 
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
@@ -33,7 +32,7 @@ func main() {
 	<-ctx.Done()
 	stop()
 
-	kafkaRead.Close()
+	err := kafkaRead.Close()
 	if err != nil {
 		log.Fatal("forced to shutdown: ", err)
 	}
