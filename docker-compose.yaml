@@ -10,11 +10,11 @@ services:
     environment:
       DB_USERNAME: "go-task-user"
       DB_PASSWORD: "go-task-pass"
-      DB_HOST: "172.26.0.2"
+      DB_HOST: "{IP_MYSQL}"
       DB_PORT: "3306"
       DB_NAME: "go-task"
       GIN_MODE: release
-      KAFKA_BROKERS: "0.0.0.0:29092"
+      KAFKA_BROKERS: "{IP_KAFKA}:29092"
 
   worker:
     build:
@@ -23,4 +23,4 @@ services:
     container_name: worker.go-task
     environment:
       GIN_MODE: release
-      KAFKA_BROKERS: "0.0.0.0:29092"
+      KAFKA_BROKERS: "{IP_KAFKA}:29092"
