@@ -11,17 +11,19 @@ import (
 	"github.com/Dionizio8/go-task/entity"
 	"github.com/Dionizio8/go-task/infra/kafka"
 	"github.com/Dionizio8/go-task/usecase/task"
+	"github.com/Dionizio8/go-task/usecase/user"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
 
 type TaskHandler struct {
-	service task.Service
-	msg     kafka.KafkaMessageExecutor
+	service     task.Service
+	userService user.Service
+	msg         kafka.KafkaMessageExecutor
 }
 
-func NewTaskHandler(service task.Service, msg kafka.KafkaMessageExecutor) *TaskHandler {
-	return &TaskHandler{service: service, msg: msg}
+func NewTaskHandler(service task.Service, userService user.Service, msg kafka.KafkaMessageExecutor) *TaskHandler {
+	return &TaskHandler{service: service, userService: userService, msg: msg}
 }
 
 func (h *TaskHandler) Create(ctx *gin.Context) {
@@ -42,7 +44,19 @@ func (h *TaskHandler) Create(ctx *gin.Context) {
 
 	userId := uuid.MustParse(ctx.GetHeader("userId"))
 
-	//TODO: Validar se o ManagerUserId é um usuário da role MANAGER
+	managerUserId, err := h.userService.FindUserById(input.ManagerUserId.String())
+	if err != nil {
+		log.Println(err.Error())
+		ctx.AbortWithError(http.StatusInternalServerError, errorMessage)
+		return
+	}
+
+	if managerUserId.Role != entity.GetUserRoleManager() {
+		log.Println("managerUserId not mnager")
+		ctx.AbortWithError(http.StatusForbidden, errorMessage)
+		return
+	}
+
 	taskId, err := h.service.CreateTask(input.Title, input.Description, userId, input.ManagerUserId, entity.GetTaskInitialState())
 	if err != nil {
 		log.Println(err.Error())
@@ -92,6 +106,7 @@ func (h *TaskHandler) EditStatus(ctx *gin.Context) {
 		return
 	}
 
+	//TODO: Criar responsta quando usuário não é o mesmo criador da task
 	errorMessage := errors.New("error find task")
 	task, err := h.service.EditTaskStatus(taskId, userId, entity.GetTaskFinalState())
 	if err != nil {
