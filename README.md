@@ -6,6 +6,12 @@ Service to manage tasks
 
 -------
 
+## Architecture
+
+[Architecture go-task](/docs/architecture.md)
+
+-------
+
 ## Initial settings local
 The project has the following dependencies :
 
