@@ -11,6 +11,6 @@ type Repository interface {
 }
 
 type UseCase interface {
-	CreateUser(user entity.User) (uuid.UUID, error)
+	CreateUser(name, role string) (uuid.UUID, error)
 	FindUserById(id string) (*entity.User, error)
 }
