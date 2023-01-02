@@ -22,43 +22,42 @@ func (r *TaskRepository) Create(task *entity.Task) (uuid.UUID, error) {
 	return task.Id, r.db.Create(task).Error
 }
 
-func (r *TaskRepository) UpdateStatus(taskId, userId, status string) (entity.Task, error) {
+func (r *TaskRepository) UpdateStatus(taskId, userId, status string) (*entity.Task, error) {
 	var task entity.Task
 	data := r.db.First(&task, "id = ?", taskId).Where("user_id = ?", userId)
 	if data.Error != nil {
 		if errors.Is(data.Error, gorm.ErrRecordNotFound) {
-			return entity.Task{}, errors.New("task not found")
+			return &entity.Task{}, errors.New("task not found")
 		}
-		return entity.Task{}, data.Error
+		return &entity.Task{}, data.Error
 	}
 
 	data.Update("status", status)
 
-	return task, nil
+	return &task, nil
 }
 
-func (r *TaskRepository) GetById(taskId, userId string) (entity.Task, error) {
+func (r *TaskRepository) GetById(taskId, userId string) (*entity.Task, error) {
 	var task entity.Task
 	err := r.db.First(&task, "id = ?", taskId).Where("user_id = ?", userId).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return entity.Task{}, errors.New("task not found")
+			return &entity.Task{}, errors.New("task not found")
 		}
-		return entity.Task{}, err
+		return &entity.Task{}, err
 	}
-	return task, nil
+	return &task, nil
 }
 
-func (r *TaskRepository) GetAll() ([]entity.Task, error) {
-	var tasks []entity.Task
+func (r *TaskRepository) GetAll() ([]*entity.Task, error) {
+	var tasks []*entity.Task
 	err := r.db.Find(&tasks).Error
 
 	return tasks, err
-
 }
 
-func (r *TaskRepository) GetByUserId(userId string) ([]entity.Task, error) {
-	var tasks []entity.Task
+func (r *TaskRepository) GetByUserId(userId string) ([]*entity.Task, error) {
+	var tasks []*entity.Task
 	err := r.db.Where("user_id = ?", userId).Order("create_at  asc").Find(&tasks).Error
 
 	return tasks, err

@@ -20,18 +20,18 @@ func (s *Service) CreateTask(title, description string, userId, managerId uuid.U
 	return s.repo.Create(task)
 }
 
-func (s *Service) EditTaskStatus(taskId, userId, status string) (entity.Task, error) {
+func (s *Service) EditTaskStatus(taskId, userId, status string) (*entity.Task, error) {
 	return s.repo.UpdateStatus(taskId, userId, status)
 }
 
-func (s *Service) FindTasktById(taskId, userId string) (entity.Task, error) {
+func (s *Service) FindTasktById(taskId, userId string) (*entity.Task, error) {
 	return s.repo.GetById(taskId, userId)
 }
 
-func (s *Service) List() ([]entity.Task, error) {
+func (s *Service) List() ([]*entity.Task, error) {
 	return s.repo.GetAll()
 }
 
-func (s *Service) FindTaskByUserId(userId string) ([]entity.Task, error) {
+func (s *Service) FindTaskByUserId(userId string) ([]*entity.Task, error) {
 	return s.repo.GetByUserId(userId)
 }

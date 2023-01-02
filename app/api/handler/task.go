@@ -142,7 +142,7 @@ func (h *TaskHandler) EditStatus(ctx *gin.Context) {
 
 }
 
-func (h *TaskHandler) getRoleList(role string, userId string) ([]entity.Task, error) {
+func (h *TaskHandler) getRoleList(role string, userId string) ([]*entity.Task, error) {
 	if role == entity.GetUserRoleManager() {
 		return h.service.List()
 	}
