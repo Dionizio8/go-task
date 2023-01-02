@@ -36,7 +36,7 @@ func (u *UserMiddler) RoleUseMiddler(ctx *gin.Context) {
 		return
 	}
 
-	err = u.validRule(user, ctx.Request.Method)
+	err = u.validRule(*user, ctx.Request.Method)
 	if err != nil {
 		ctx.AbortWithError(http.StatusForbidden, err)
 		return
